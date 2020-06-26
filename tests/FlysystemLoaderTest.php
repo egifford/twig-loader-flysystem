@@ -9,6 +9,7 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\Handler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Twig\Error\LoaderError;
 
 /**
  * @package CedricZiel\TwigLoaderFlysystem\Test
@@ -53,15 +54,16 @@ class FlysystemLoaderTest extends TestCase
 
         $loader = new FlysystemLoader($filesystem);
 
-        $loader->getSource('test/Object.twig');
+        $loader->getSourceContext('test/Object.twig');
     }
 
     /**
-     * @expectedException \Twig_Error_Loader
      * @test
      */
-    public function throwsLoaderErrorWhenTemplateNotFount(): void
+    public function throwsLoaderErrorWhenTemplateNotFound(): void
     {
+        $this->expectException(LoaderError::class);
+
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
@@ -74,7 +76,7 @@ class FlysystemLoaderTest extends TestCase
 
         $loader = new FlysystemLoader($filesystem);
 
-        $loader->getSource('test/Object.twig');
+        $loader->getSourceContext('test/Object.twig');
     }
 
     /**
@@ -203,6 +205,6 @@ class FlysystemLoaderTest extends TestCase
 
         $loader = new FlysystemLoader($filesystem, 'templates');
 
-        $loader->getSource('test/Object.twig');
+        $loader->getSourceContext('test/Object.twig');
     }
 }
