@@ -16,7 +16,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function loaderCanLoadTemplatesByPath()
+    public function loaderCanLoadTemplatesByPath(): void
     {
         $templateFile = $this->getMockBuilder(Handler::class)
             ->getMock();
@@ -58,7 +58,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
      * @expectedException \Twig_Error_Loader
      * @test
      */
-    public function throwsLoaderErrorWhenTemplateNotFount()
+    public function throwsLoaderErrorWhenTemplateNotFount(): void
     {
         /** @var Filesystem|\PHPUnit_Framework_MockObject_MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
@@ -78,7 +78,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function canCreateCacheKey()
+    public function canCreateCacheKey(): void
     {
         $templateFile = $this->getMockBuilder(Handler::class)
             ->getMock();
@@ -120,7 +120,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function canDetermineIfATemplateIsStillFresh()
+    public function canDetermineIfATemplateIsStillFresh(): void
     {
         $templateFile = $this->getMockBuilder(File::class)
             ->getMock();
@@ -165,7 +165,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function aFilesystemPrefixCanBeUsed()
+    public function aFilesystemPrefixCanBeUsed(): void
     {
         $templateFile = $this->getMockBuilder(Handler::class)
             ->getMock();
