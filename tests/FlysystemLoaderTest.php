@@ -7,11 +7,13 @@ use League\Flysystem\AdapterInterface;
 use League\Flysystem\File;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Handler;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @package CedricZiel\TwigLoaderFlysystem\Test
  */
-class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
+class FlysystemLoaderTest extends TestCase
 {
     /**
      * @test
@@ -30,7 +32,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
             ->method('read')
             ->willReturn($templateFile);
 
-        /** @var Filesystem|\PHPUnit_Framework_MockObject_MockObject $filesystem */
+        /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
             ->setMethods(['has', 'get', 'getAdapter', 'read'])
@@ -60,7 +62,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
      */
     public function throwsLoaderErrorWhenTemplateNotFount(): void
     {
-        /** @var Filesystem|\PHPUnit_Framework_MockObject_MockObject $filesystem */
+        /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
             ->setMethods(['has', 'get', 'getAdapter', 'read'])
@@ -92,7 +94,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
             ->method('read')
             ->willReturn($templateFile);
 
-        /** @var Filesystem|\PHPUnit_Framework_MockObject_MockObject $filesystem */
+        /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
             ->setMethods(['has', 'get', 'getAdapter', 'read'])
@@ -137,7 +139,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
             ->method('read')
             ->willReturn($templateFile);
 
-        /** @var Filesystem|\PHPUnit_Framework_MockObject_MockObject $filesystem */
+        /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
             ->setMethods(['has', 'get', 'getAdapter', 'read'])
@@ -179,7 +181,7 @@ class FlysystemLoaderTest extends \PHPUnit_Framework_TestCase
             ->method('read')
             ->willReturn($templateFile);
 
-        /** @var Filesystem|\PHPUnit_Framework_MockObject_MockObject $filesystem */
+        /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
             ->setMethods(['has', 'get', 'getAdapter', 'read'])
