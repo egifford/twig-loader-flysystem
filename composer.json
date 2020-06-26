@@ -5,7 +5,7 @@
   "homepage": "https://github.com/cedricziel/twig-loader-flysystem",
   "require": {
     "php": "~7.1",
-    "twig/twig": "^1.24",
+    "twig/twig": "^2.12",
     "league/flysystem": "^1.0"
   },
   "require-dev": {

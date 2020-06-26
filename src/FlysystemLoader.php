@@ -2,9 +2,13 @@
 
 namespace CedricZiel\TwigLoaderFlysystem;
 
+use League\Flysystem\File;
+use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem;
-use Twig_Error_Loader;
-use Twig_LoaderInterface;
+use League\Flysystem\Handler;
+use Twig\Error\LoaderError;
+use Twig\Loader\LoaderInterface;
+use Twig\Source;
 
 /**
  * Provides a template loader for twig that allows to use flysystem
@@ -12,7 +16,7 @@ use Twig_LoaderInterface;
  *
  * @package CedricZiel\TwigLoaderFlysystem
  */
-class FlysystemLoader implements Twig_LoaderInterface
+class FlysystemLoader implements LoaderInterface
 {
     /**
      * @var Filesystem
@@ -41,15 +45,22 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @param string $name The name of the template to load
      *
-     * @return string The template source code
+     * @return Source The template source code
      *
-     * @throws Twig_Error_Loader When $name is not found
+     * @throws LoaderError When $name is not found
      */
-    public function getSource($name): string
+    public function getSourceContext($name): Source
     {
         $this->getFileOrFail($name);
 
-        return $this->filesystem->read($this->resolveTemplateName($name));
+        try {
+            return new Source(
+              $this->filesystem->read($this->resolveTemplateName($name)),
+              $name
+            );
+        } catch (FileNotFoundException $e) {
+            throw new LoaderError('File not found.', -1, null, $e);
+        }
     }
 
     /**
@@ -57,18 +68,19 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @param string $name
      *
-     * @return \League\Flysystem\File|\League\Flysystem\Handler
-     * @throws Twig_Error_Loader
+     * @return File|Handler
+     *
+     * @throws LoaderError
      */
     protected function getFileOrFail($name)
     {
         if (!$this->filesystem->has($this->resolveTemplateName($name))) {
-            throw new Twig_Error_Loader('Template could not be found on the given filesystem');
+            throw new LoaderError('Template could not be found on the given filesystem');
         }
 
         $fileObject = $this->filesystem->get($this->resolveTemplateName($name));
         if ($fileObject->isDir()) {
-            throw new Twig_Error_Loader('Cannot use directory as template');
+            throw new LoaderError('Cannot use directory as template');
         }
 
         return $fileObject;
@@ -81,7 +93,7 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @return string The cache key
      *
-     * @throws Twig_Error_Loader When $name is not found
+     * @throws LoaderError When $name is not found
      */
     public function getCacheKey($name): string
     {
@@ -99,13 +111,31 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @return bool true if the template is fresh, false otherwise
      *
-     * @throws Twig_Error_Loader When $name is not found
+     * @throws LoaderError When $name is not found
      */
     public function isFresh($name, $time): bool
     {
         $object = $this->getFileOrFail($name);
 
         return (int)$time >= (int)$object->getTimestamp();
+    }
+
+    /**
+     * Check if we have the source code of a template, given its name.
+     *
+     * @param string $name The name of the template to check if we can load
+     *
+     * @return bool If the template source code is handled by this loader or not
+     */
+    public function exists($name): bool
+    {
+        try {
+            $this->getFileOrFail($name);
+        } catch (LoaderError $loader_error) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
