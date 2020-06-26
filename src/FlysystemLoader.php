@@ -45,7 +45,7 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @throws Twig_Error_Loader When $name is not found
      */
-    public function getSource($name)
+    public function getSource($name): string
     {
         $this->getFileOrFail($name);
 
@@ -83,7 +83,7 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @throws Twig_Error_Loader When $name is not found
      */
-    public function getCacheKey($name)
+    public function getCacheKey($name): string
     {
         $this->getFileOrFail($name);
 
@@ -101,7 +101,7 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @throws Twig_Error_Loader When $name is not found
      */
-    public function isFresh($name, $time)
+    public function isFresh($name, $time): bool
     {
         $object = $this->getFileOrFail($name);
 
@@ -113,7 +113,7 @@ class FlysystemLoader implements Twig_LoaderInterface
      *
      * @return string
      */
-    protected function resolveTemplateName($name)
+    protected function resolveTemplateName($name): string
     {
         $prefix = $this->templatePath;
         if ($this->templatePath !== null && $this->templatePath !== '') {
