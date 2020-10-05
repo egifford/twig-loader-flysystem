@@ -72,7 +72,7 @@ class FlysystemLoader implements LoaderInterface
      *
      * @throws LoaderError
      */
-    protected function getFileOrFail(string $name)
+    private function getFileOrFail(string $name)
     {
         if (!$this->filesystem->has($this->resolveTemplateName($name))) {
             throw new LoaderError('Template could not be found on the given filesystem');
