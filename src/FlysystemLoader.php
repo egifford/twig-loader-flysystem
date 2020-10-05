@@ -49,7 +49,7 @@ class FlysystemLoader implements LoaderInterface
      *
      * @throws LoaderError When $name is not found
      */
-    public function getSourceContext($name): Source
+    public function getSourceContext(string $name): Source
     {
         $this->getFileOrFail($name);
 
@@ -72,7 +72,7 @@ class FlysystemLoader implements LoaderInterface
      *
      * @throws LoaderError
      */
-    protected function getFileOrFail($name)
+    protected function getFileOrFail(string $name)
     {
         if (!$this->filesystem->has($this->resolveTemplateName($name))) {
             throw new LoaderError('Template could not be found on the given filesystem');
@@ -95,7 +95,7 @@ class FlysystemLoader implements LoaderInterface
      *
      * @throws LoaderError When $name is not found
      */
-    public function getCacheKey($name): string
+    public function getCacheKey(string $name): string
     {
         $this->getFileOrFail($name);
 
@@ -113,11 +113,11 @@ class FlysystemLoader implements LoaderInterface
      *
      * @throws LoaderError When $name is not found
      */
-    public function isFresh($name, $time): bool
+    public function isFresh(string $name, int $time): bool
     {
         $object = $this->getFileOrFail($name);
 
-        return (int)$time >= (int)$object->getTimestamp();
+        return $time >= (int)$object->getTimestamp();
     }
 
     /**
@@ -127,7 +127,7 @@ class FlysystemLoader implements LoaderInterface
      *
      * @return bool If the template source code is handled by this loader or not
      */
-    public function exists($name): bool
+    public function exists(string $name): bool
     {
         try {
             $this->getFileOrFail($name);
@@ -143,7 +143,7 @@ class FlysystemLoader implements LoaderInterface
      *
      * @return string
      */
-    protected function resolveTemplateName($name): string
+    protected function resolveTemplateName(string $name): string
     {
         $prefix = $this->templatePath;
         if ($this->templatePath !== null && $this->templatePath !== '') {
