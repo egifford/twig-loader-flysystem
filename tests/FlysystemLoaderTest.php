@@ -36,7 +36,7 @@ class FlysystemLoaderTest extends TestCase
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->setMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
             ->getMock();
         $filesystem
             ->method('getAdapter')
@@ -45,7 +45,7 @@ class FlysystemLoaderTest extends TestCase
             ->method('read')
             ->willReturn('{{ template }}');
         $filesystem
-            ->expects($this->atLeastOnce())
+            ->expects(self::atLeastOnce())
             ->method('has')
             ->willReturn(true);
         $filesystem
@@ -67,10 +67,10 @@ class FlysystemLoaderTest extends TestCase
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->setMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
             ->getMock();
         $filesystem
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('has')
             ->willReturn(false);
 
@@ -99,7 +99,7 @@ class FlysystemLoaderTest extends TestCase
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->setMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
             ->getMock();
         $filesystem
             ->method('getAdapter')
@@ -108,7 +108,7 @@ class FlysystemLoaderTest extends TestCase
             ->method('read')
             ->willReturn('{{ template }}');
         $filesystem
-            ->expects($this->atLeastOnce())
+            ->expects(self::atLeastOnce())
             ->method('has')
             ->willReturn(true);
         $filesystem
@@ -118,7 +118,7 @@ class FlysystemLoaderTest extends TestCase
         $loader = new FlysystemLoader($filesystem);
 
         $cacheKey = 'test/Object.twig';
-        $this->assertEquals($cacheKey, $loader->getCacheKey($cacheKey));
+        self::assertEquals($cacheKey, $loader->getCacheKey($cacheKey));
     }
 
     /**
@@ -144,7 +144,7 @@ class FlysystemLoaderTest extends TestCase
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->setMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
             ->getMock();
         $filesystem
             ->method('getAdapter')
@@ -153,7 +153,7 @@ class FlysystemLoaderTest extends TestCase
             ->method('read')
             ->willReturn('{{ template }}');
         $filesystem
-            ->expects($this->atLeastOnce())
+            ->expects(self::atLeastOnce())
             ->method('has')
             ->willReturn(true);
         $filesystem
@@ -163,7 +163,7 @@ class FlysystemLoaderTest extends TestCase
         $loader = new FlysystemLoader($filesystem);
 
         $templateFile = 'test/Object.twig';
-        $this->assertTrue($loader->isFresh($templateFile, 1234));
+        self::assertTrue($loader->isFresh($templateFile, 1234));
     }
 
     /**
@@ -186,7 +186,7 @@ class FlysystemLoaderTest extends TestCase
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->setMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
             ->getMock();
         $filesystem
             ->method('getAdapter')
@@ -195,7 +195,7 @@ class FlysystemLoaderTest extends TestCase
             ->method('read')
             ->willReturn('{{ template }}');
         $filesystem
-            ->expects($this->atLeastOnce())
+            ->expects(self::atLeastOnce())
             ->method('has')
             ->willReturn(true);
         $filesystem
