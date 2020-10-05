@@ -21,12 +21,12 @@ class FlysystemLoader implements LoaderInterface
     /**
      * @var Filesystem
      */
-    private $filesystem;
+    private Filesystem $filesystem;
 
     /**
      * @var string
      */
-    private $templatePath;
+    private string $templatePath;
 
     /**
      * FlysystemLoader constructor.
