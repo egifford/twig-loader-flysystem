@@ -4,7 +4,7 @@
   "keywords": ["twig", "templates", "loader", "filesystem", "flysystem"],
   "homepage": "https://github.com/cedricziel/twig-loader-flysystem",
   "require": {
-    "php": "~7.1",
+    "php": "~7.4",
     "twig/twig": "^2.12",
     "league/flysystem": "^1.0"
   },
