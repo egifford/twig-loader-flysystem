@@ -55,8 +55,8 @@ class FlysystemLoader implements LoaderInterface
 
         try {
             return new Source(
-              $this->filesystem->read($this->resolveTemplateName($name)),
-              $name
+                $this->filesystem->read($this->resolveTemplateName($name)),
+                $name
             );
         } catch (FileNotFoundException $e) {
             throw new LoaderError('File not found.', -1, null, $e);
