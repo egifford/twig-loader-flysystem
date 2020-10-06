@@ -3,10 +3,7 @@
 namespace CedricZiel\TwigLoaderFlysystem\Test;
 
 use CedricZiel\TwigLoaderFlysystem\FlysystemLoader;
-use League\Flysystem\AdapterInterface;
-use League\Flysystem\File;
 use League\Flysystem\Filesystem;
-use League\Flysystem\Handler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Twig\Error\LoaderError;
@@ -18,43 +15,41 @@ class FlysystemLoaderTest extends TestCase
 {
     /**
      * @test
+     *
+     * @throws LoaderError
      */
     public function loaderCanLoadTemplatesByPath(): void
     {
-        $templateFile = $this->getMockBuilder(Handler::class)
-            ->getMock();
-        $templateFile
-            ->method('isDir')
-            ->willReturn(false);
-
-        $filesystemAdapter = $this->getMockBuilder(AdapterInterface::class)
-            ->getMock();
-        $filesystemAdapter
-            ->method('read')
-            ->willReturn($templateFile);
+        $templateName = 'test/Object.twig';
+        $templateCode = '{{ template }}';
 
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods([
+                'has',
+                'getMetadata',
+                'read',
+            ])
             ->getMock();
         $filesystem
-            ->method('getAdapter')
-            ->willReturn($filesystemAdapter);
-        $filesystem
-            ->method('read')
-            ->willReturn('{{ template }}');
-        $filesystem
-            ->expects(self::atLeastOnce())
+            ->expects(self::atLeastOnce()) // This a an assertion.
             ->method('has')
+            ->with($templateName) // This a an assertion.
             ->willReturn(true);
         $filesystem
-            ->method('get')
-            ->willReturn($templateFile);
+            ->method('getMetadata')
+            ->willReturn(['type' => 'file']);
+        $filesystem
+            ->method('read')
+            ->with($templateName) // This a an assertion.
+            ->willReturn($templateCode);
 
         $loader = new FlysystemLoader($filesystem);
+        $source = $loader->getSourceContext($templateName);
 
-        $loader->getSourceContext('test/Object.twig');
+        self::assertSame($templateCode, $source->getCode());
+        self::assertSame($templateName, $source->getName());
     }
 
     /**
@@ -63,148 +58,133 @@ class FlysystemLoaderTest extends TestCase
     public function throwsLoaderErrorWhenTemplateNotFound(): void
     {
         $this->expectException(LoaderError::class);
+        $this->expectExceptionMessage('Template could not be found on the given filesystem');
+
+        $templateName = 'test/Object.twig';
 
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods([
+                'has',
+            ])
             ->getMock();
         $filesystem
-            ->expects(self::once())
+            ->expects(self::once()) // This a an assertion.
             ->method('has')
+            ->with($templateName) // This a an assertion.
             ->willReturn(false);
 
         $loader = new FlysystemLoader($filesystem);
-
-        $loader->getSourceContext('test/Object.twig');
+        $loader->getSourceContext($templateName);
     }
 
     /**
      * @test
+     *
+     * @throws LoaderError
      */
     public function canCreateCacheKey(): void
     {
-        $templateFile = $this->getMockBuilder(Handler::class)
-            ->getMock();
-        $templateFile
-            ->method('isDir')
-            ->willReturn(false);
-
-        $filesystemAdapter = $this->getMockBuilder(AdapterInterface::class)
-            ->getMock();
-        $filesystemAdapter
-            ->method('read')
-            ->willReturn($templateFile);
+        $templateName = 'test/Object.twig';
 
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods([
+                'has',
+                'getMetadata',
+            ])
             ->getMock();
         $filesystem
-            ->method('getAdapter')
-            ->willReturn($filesystemAdapter);
-        $filesystem
-            ->method('read')
-            ->willReturn('{{ template }}');
-        $filesystem
-            ->expects(self::atLeastOnce())
+            ->expects(self::atLeastOnce()) // This a an assertion.
             ->method('has')
+            ->with($templateName) // This a an assertion.
             ->willReturn(true);
         $filesystem
-            ->method('get')
-            ->willReturn($templateFile);
+            ->method('getMetadata')
+            ->willReturn(['type' => 'file']);
 
         $loader = new FlysystemLoader($filesystem);
 
-        $cacheKey = 'test/Object.twig';
-        self::assertEquals($cacheKey, $loader->getCacheKey($cacheKey));
+        self::assertEquals($templateName, $loader->getCacheKey($templateName));
     }
 
     /**
      * @test
+     *
+     * @throws LoaderError
      */
     public function canDetermineIfATemplateIsStillFresh(): void
     {
-        $templateFile = $this->getMockBuilder(File::class)
-            ->getMock();
-        $templateFile
-            ->method('isDir')
-            ->willReturn(false);
-        $templateFile
-            ->method('getTimestamp')
-            ->willReturn(1233);
-
-        $filesystemAdapter = $this->getMockBuilder(AdapterInterface::class)
-            ->getMock();
-        $filesystemAdapter
-            ->method('read')
-            ->willReturn($templateFile);
+        $templateName = 'test/Object.twig';
+        $timestamp    = 1233;
 
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods([
+                'has',
+                'getMetadata',
+                'getTimestamp',
+            ])
             ->getMock();
         $filesystem
-            ->method('getAdapter')
-            ->willReturn($filesystemAdapter);
-        $filesystem
-            ->method('read')
-            ->willReturn('{{ template }}');
-        $filesystem
-            ->expects(self::atLeastOnce())
+            ->expects(self::atLeastOnce()) // This a an assertion.
             ->method('has')
+            ->with($templateName) // This a an assertion.
             ->willReturn(true);
         $filesystem
-            ->method('get')
-            ->willReturn($templateFile);
+            ->method('getMetadata')
+            ->willReturn(['type' => 'file']);
+        $filesystem
+            ->method('getTimestamp')
+            ->willReturn($timestamp);
 
         $loader = new FlysystemLoader($filesystem);
 
-        $templateFile = 'test/Object.twig';
-        self::assertTrue($loader->isFresh($templateFile, 1234));
+        self::assertTrue($loader->isFresh($templateName, $timestamp + 1));
     }
 
     /**
      * @test
+     *
+     * @throws LoaderError
      */
     public function aFilesystemPrefixCanBeUsed(): void
     {
-        $templateFile = $this->getMockBuilder(Handler::class)
-            ->getMock();
-        $templateFile
-            ->method('isDir')
-            ->willReturn(false);
-
-        $filesystemAdapter = $this->getMockBuilder(AdapterInterface::class)
-            ->getMock();
-        $filesystemAdapter
-            ->method('read')
-            ->willReturn($templateFile);
+        $prefix               = 'templates';
+        $templateName         = 'test/Object.twig';
+        $templateNamePrefixed = $prefix . '/' . $templateName;
+        $templateCode         = '{{ template }}';
 
         /** @var Filesystem|MockObject $filesystem */
         $filesystem = $this->getMockBuilder(Filesystem::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['has', 'get', 'getAdapter', 'read'])
+            ->onlyMethods([
+                'has',
+                'getMetadata',
+                'read',
+            ])
             ->getMock();
         $filesystem
-            ->method('getAdapter')
-            ->willReturn($filesystemAdapter);
-        $filesystem
-            ->method('read')
-            ->willReturn('{{ template }}');
-        $filesystem
-            ->expects(self::atLeastOnce())
+            ->expects(self::atLeastOnce()) // This a an assertion.
             ->method('has')
+            ->with($templateNamePrefixed) // This a an assertion.
             ->willReturn(true);
         $filesystem
-            ->method('get')
-            ->with('templates/test/Object.twig')
-            ->willReturn($templateFile);
+            ->method('getMetadata')
+            ->willReturn(['type' => 'file']);
+        $filesystem
+            ->expects(self::atLeastOnce()) // This a an assertion.
+            ->method('read')
+            ->with($templateNamePrefixed) // This a an assertion.
+            ->willReturn($templateCode);
 
-        $loader = new FlysystemLoader($filesystem, 'templates');
+        $loader = new FlysystemLoader($filesystem, $prefix);
 
-        $loader->getSourceContext('test/Object.twig');
+        $source = $loader->getSourceContext($templateName);
+        self::assertSame($templateName, $source->getName());
+        self::assertSame($templateCode, $source->getCode());
     }
 }
