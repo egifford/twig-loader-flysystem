@@ -2,10 +2,8 @@
 
 namespace CedricZiel\TwigLoaderFlysystem;
 
-use League\Flysystem\File;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem;
-use League\Flysystem\Handler;
 use Twig\Error\LoaderError;
 use Twig\Loader\LoaderInterface;
 use Twig\Source;
@@ -32,11 +30,11 @@ class FlysystemLoader implements LoaderInterface
      * FlysystemLoader constructor.
      *
      * @param Filesystem $filesystem
-     * @param string $templatePath
+     * @param string     $templatePath
      */
     public function __construct(Filesystem $filesystem, $templatePath = '')
     {
-        $this->filesystem = $filesystem;
+        $this->filesystem   = $filesystem;
         $this->templatePath = $templatePath;
     }
 
@@ -51,7 +49,7 @@ class FlysystemLoader implements LoaderInterface
      */
     public function getSourceContext(string $name): Source
     {
-        $this->getFileOrFail($name);
+        $this->existsOrFail($name);
 
         try {
             return new Source(
@@ -61,29 +59,6 @@ class FlysystemLoader implements LoaderInterface
         } catch (FileNotFoundException $e) {
             throw new LoaderError('File not found.', -1, null, $e);
         }
-    }
-
-    /**
-     * Checks if the underlying flysystem contains a file of the given name.
-     *
-     * @param string $name
-     *
-     * @return File|Handler
-     *
-     * @throws LoaderError
-     */
-    private function getFileOrFail(string $name)
-    {
-        if (!$this->filesystem->has($this->resolveTemplateName($name))) {
-            throw new LoaderError('Template could not be found on the given filesystem');
-        }
-
-        $fileObject = $this->filesystem->get($this->resolveTemplateName($name));
-        if ($fileObject->isDir()) {
-            throw new LoaderError('Cannot use directory as template');
-        }
-
-        return $fileObject;
     }
 
     /**
@@ -97,7 +72,7 @@ class FlysystemLoader implements LoaderInterface
      */
     public function getCacheKey(string $name): string
     {
-        $this->getFileOrFail($name);
+        $this->existsOrFail($name);
 
         return $name;
     }
@@ -115,9 +90,15 @@ class FlysystemLoader implements LoaderInterface
      */
     public function isFresh(string $name, int $time): bool
     {
-        $object = $this->getFileOrFail($name);
+        $this->existsOrFail($name);
 
-        return $time >= (int)$object->getTimestamp();
+        // getTimestamp() throws a FileNotFoundException, however we've already checked that the path exists.
+        // Let's handle it anyway just in case.
+        try {
+            return $time >= $this->filesystem->getTimestamp($name);
+        } catch (FileNotFoundException $e) {
+            throw new LoaderError('File not found.', -1, null, $e);
+        }
     }
 
     /**
@@ -130,7 +111,7 @@ class FlysystemLoader implements LoaderInterface
     public function exists(string $name): bool
     {
         try {
-            $this->getFileOrFail($name);
+            $this->existsOrFail($name);
         } catch (LoaderError $loader_error) {
             return false;
         }
@@ -139,17 +120,46 @@ class FlysystemLoader implements LoaderInterface
     }
 
     /**
+     * Checks if the underlying flysystem contains a file of the given name.
+     *
+     * @param string $name
+     *
+     * @return void
+     *
+     * @throws LoaderError
+     */
+    private function existsOrFail(string $name): void
+    {
+        $resolvedTemplateName = $this->resolveTemplateName($name);
+
+        if (!$this->filesystem->has($resolvedTemplateName)) {
+            throw new LoaderError('Template could not be found on the given filesystem');
+        }
+
+        // getMetadata() throws a FileNotFoundException, however we've already checked that the path exists.
+        // Let's handle it anyway just in case.
+        try {
+            $metadata = $this->filesystem->getMetadata($resolvedTemplateName);
+            if ('dir' === $metadata['type']) {
+                throw new LoaderError('Cannot use directory as template');
+            }
+        } catch (FileNotFoundException $e) {
+            throw new LoaderError('File not found.', -1, null, $e);
+        }
+    }
+
+    /**
      * @param string $name
      *
      * @return string
      */
-    protected function resolveTemplateName(string $name): string
+    private function resolveTemplateName(string $name): string
     {
         $prefix = $this->templatePath;
         if ($this->templatePath !== null && $this->templatePath !== '') {
-            $prefix = rtrim($prefix, '/').'/';
+            $prefix = rtrim($prefix, '/') . '/';
         }
 
-        return $prefix.$name;
+        return $prefix . $name;
     }
 }
